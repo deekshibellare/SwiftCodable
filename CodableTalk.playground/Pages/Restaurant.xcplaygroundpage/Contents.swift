@@ -1,18 +1,21 @@
 //: [Previous](@previous)
 
 import Foundation
+//Let us inspect the JSON for Restaurant and decode as per our needs
+
 let data = """
 {
    "id":"16774318",
    "name":"Otto Enoteca & Pizzeria",
    "url":"https://www.zomato.com/new-york-city/otto-enoteca-pizzeria-greenwich-village",
+  "average_cost_for_two":"60",
    "cusine":"American",
    "location":{
       "address":"1 5th Avenue, New York, NY 10003",
       "locality":"Greenwich Village",
       "city":"New York City"
    },
-   "average_cost_for_two":"60",
+  
    "user_rating":{
       "aggregate_rating":"3.7",
       "rating_text":"Very Good",
@@ -21,7 +24,10 @@ let data = """
    }
 }
 """.data(using:.utf8)!
-//SRest
+//Restaurant class would look like this
+//Let's assume cusine has predefined types, so makes a good case for Enum
+//Location response seems to be standard for many API's in Zomato. So we will create a separate object
+//Now restaurant rating is grouped in user_rating dictionary but I am just concerned about aggregate rating and I want it to be part of Restaurant. So I define two coding keys - One for  Restaurant and another for user rating
 class Restaurant:Decodable {
     var id:String?
     var name:String?
@@ -52,16 +58,24 @@ class Restaurant:Decodable {
     }
   
     required init(from decoder:Decoder) {
+        //Get top container
         let container = try? decoder.container(keyedBy: CodingKeys.self)
+        
         self.id = try! container?.decode(String.self, forKey: .id)
         self.name = try!
             container?.decode(String.self, forKey: .name)
         self.averageCostForTwo = try! container?.decode(String.self, forKey: .averageCostForTwo)
         self.url = try!
             container?.decode(String.self, forKey: .url)
+        
+        //Decode location
         self.location = try! container?.decode(Location.self, forKey: .location)
+        //Decode cusine
         self.cusine = try! container?.decode(Cusine.self, forKey: .cusine)
+        
+        //Get inner container mapping to UserRatingkeys
         let ratingContainer = try! container?.nestedContainer(keyedBy: UserRatingkeys.self, forKey:.userRating)
+        //Fetch aggregate rating value from ratingContainer and assign to aggregateRating
         self.aggregateRating = try! ratingContainer?.decode(String.self, forKey: .aggregateRating)
     }
 }
@@ -78,4 +92,4 @@ let decoder = JSONDecoder()
 decoder.keyDecodingStrategy = .convertFromSnakeCase
 let restaurant = try? decoder.decode(Restaurant.self, from: data)
 
-// There are few advanced case and examples to cover - may be in the next talk
+// Tha's the end! Hopefully we can cover few advanced use cases in the next session.

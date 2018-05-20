@@ -1,7 +1,7 @@
 //: [Previous](@previous)
 
 import Foundation
-
+//What if we have array of categories?
 let data = """
 [ {
     "category_id": "3",
@@ -24,5 +24,6 @@ struct Category:Decodable {
 }
 
 let decoder = JSONDecoder()
+//Now worries, just decode object of type - array of categories.
 let categories = try? decoder.decode([Category].self, from: data)
 //: [Next](@next)
